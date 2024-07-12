@@ -816,6 +816,27 @@ var _ = Describe("Consistency", Ordered, func() {
 		}
 	})
 
+	It("DBSize Consistency Test", func() {
+		const testKey = "DBSizeConsistencyTestKey"
+		const testValue = "DBSizeConsistencyTestKey"
+		{
+			// set write on leader
+			set, err := leader.Set(ctx, testKey, testValue, 0).Result()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(set).To(Equal("OK"))
+
+			dbSize, err := leader.DBSize(ctx).Result()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(dbSize).To(Equal(int64(1)))
+
+			// read check
+			readChecker(func(c *redis.Client) {
+				dbSize, err := c.DBSize(ctx).Result()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(dbSize).To(Equal(int64(1)))
+			})
+		}
+	})
 })
 
 func readChecker(check func(*redis.Client)) {

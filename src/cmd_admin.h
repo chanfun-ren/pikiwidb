@@ -126,6 +126,17 @@ class InfoCmd : public BaseCmd {
   void InfoData(PClient* client);
 };
 
+class DbsizeCmd : public BaseCmd {
+ public:
+  DbsizeCmd(const std::string& name, int16_t arity);
+
+ protected:
+  bool DoInitial(PClient* client) override;
+
+ private:
+  void DoCmd(PClient* client) override;
+};
+
 class CmdDebug : public BaseCmdGroup {
  public:
   CmdDebug(const std::string& name, int arity);

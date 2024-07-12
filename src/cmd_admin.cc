@@ -226,6 +226,27 @@ void InfoCmd::InfoData(PClient* client) {
   client->AppendString(message);
 }
 
+DbsizeCmd::DbsizeCmd(const std::string& name, int16_t arity)
+    : BaseCmd(name, arity, kCmdFlagsAdmin | kCmdFlagsReadonly, kAclCategoryAdmin) {}
+
+bool DbsizeCmd::DoInitial(PClient* client) { return true; }
+
+void DbsizeCmd::DoCmd(PClient* client) {
+  if (client->argv_.size() != 1) {
+    return client->SetRes(CmdRes::kWrongNum, client->CmdName());
+  }
+
+  // Return the number of keys in the currently-selected database.
+  uint64_t db_size = 0;
+  std::vector<storage::KeyInfo> key_infos;
+  PSTORE.GetBackend(client->GetCurrentDB())->GetStorage()->GetKeyNum(&key_infos);
+  for (storage::KeyInfo& info : key_infos) {
+    db_size += info.keys;
+  }
+
+  client->AppendInteger(db_size);
+}
+
 CmdDebug::CmdDebug(const std::string& name, int arity) : BaseCmdGroup(name, kCmdFlagsAdmin, kAclCategoryAdmin) {}
 
 bool CmdDebug::HasSubCommand() const { return true; }

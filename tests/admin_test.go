@@ -153,6 +153,28 @@ var _ = Describe("Admin", Ordered, func() {
 		Expect(ping.Err()).NotTo(HaveOccurred())
 	})
 
+	It("Cmd DBSize", func() {
+		res := client.DBSize(ctx)
+		Expect(res.Err()).NotTo(HaveOccurred())
+		Expect(res.Val()).To(Equal(int64(0)))
+
+		client.Set(ctx, "key1", "value1", 0)
+		Expect(res.Err()).NotTo(HaveOccurred())
+		Expect(client.DBSize(ctx).Val()).To(Equal(int64(1)))
+
+		client.Set(ctx, "key2", "value2", 0)
+		Expect(res.Err()).NotTo(HaveOccurred())
+		Expect(client.DBSize(ctx).Val()).To(Equal(int64(2)))
+
+		client.Del(ctx, "key1")
+		Expect(res.Err()).NotTo(HaveOccurred())
+		Expect(client.DBSize(ctx).Val()).To(Equal(int64(1)))
+
+		client.Del(ctx, "key2")
+		Expect(res.Err()).NotTo(HaveOccurred())
+		Expect(client.DBSize(ctx).Val()).To(Equal(int64(0)))
+	})
+
 	It("Cmd Debug", func() {
 		// TODO: enable test after implementing DebugObject
 		// res := client.DebugObject(ctx, "timeout")
