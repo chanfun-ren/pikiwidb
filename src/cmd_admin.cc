@@ -14,6 +14,7 @@
 #include "pikiwidb.h"
 #include "praft/praft.h"
 #include "pstd/env.h"
+#include "pstd/pstd_util.h"
 
 #include "store.h"
 
@@ -245,6 +246,46 @@ void DbsizeCmd::DoCmd(PClient* client) {
   }
 
   client->AppendInteger(db_size);
+}
+
+BgsaveCmd::BgsaveCmd(const std::string& name, int16_t arity)
+    : BaseCmd(name, arity, kCmdFlagsAdmin, kAclCategoryAdmin) {}
+
+bool BgsaveCmd::DoInitial(PClient* client) { return true; }
+
+void BgsaveCmd::DoCmd(PClient* client) {
+  if (client->argv_.size() != 1) {
+    return client->SetRes(CmdRes::kWrongNum, client->CmdName());
+  }
+
+  if (g_pikiwidb->IsBgSaving()) {
+    return client->SetRes(CmdRes::kErrOther, "Background saving already in progress");
+  }
+
+  g_pikiwidb->StartBgsave();
+  INFO("Background saving started");
+
+  std::string path = "./dump_";
+  path += pstd::NowTimeStr();
+  for (size_t i = 0; i < g_config.databases; ++i) {
+    PSTORE.GetBackend(i)->CreateCheckpoint(path, false);
+  }
+
+  g_pikiwidb->FinishBgsave();
+
+  client->AppendString("Background saving started");
+}
+
+LastsaveCmd::LastsaveCmd(const std::string& name, int16_t arity)
+    : BaseCmd(name, arity, kCmdFlagsAdmin | kCmdFlagsReadonly, kAclCategoryAdmin) {}
+
+bool LastsaveCmd::DoInitial(PClient* client) { return true; }
+
+void LastsaveCmd::DoCmd(PClient* client) {
+  if (client->argv_.size() != 1) {
+    return client->SetRes(CmdRes::kWrongNum, client->CmdName());
+  }
+  client->AppendInteger(g_pikiwidb->GetLastSave());
 }
 
 CmdDebug::CmdDebug(const std::string& name, int arity) : BaseCmdGroup(name, kCmdFlagsAdmin, kAclCategoryAdmin) {}

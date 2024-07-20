@@ -38,6 +38,11 @@ class PikiwiDB final {
 
   void OnNewConnection(pikiwidb::TcpConnection* obj);
 
+  bool IsBgSaving() const { return is_bgsaving_; }
+  void StartBgsave();
+  void FinishBgsave();
+  int64_t GetLastSave() const;
+
   //  pikiwidb::CmdTableManager& GetCmdTableManager();
   uint32_t GetCmdID() { return ++cmd_id_; };
 
@@ -62,6 +67,9 @@ class PikiwiDB final {
   //  pikiwidb::CmdTableManager cmd_table_manager_;
 
   uint32_t cmd_id_ = 0;
+
+  std::atomic<bool> is_bgsaving_ = false;
+  int64_t lastsave_ = 0;
 };
 
 extern std::unique_ptr<PikiwiDB> g_pikiwidb;

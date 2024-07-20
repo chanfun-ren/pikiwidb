@@ -89,6 +89,8 @@ const std::string kSubCmdNameDebugOOM = "oom";
 const std::string kSubCmdNameDebugSegfault = "segfault";
 const std::string kCmdNameInfo = "info";
 const std::string kCmdNameDbsize = "dbsize";
+const std::string kCmdNameBgsave = "bgsave";
+const std::string kCmdNameLastsave = "lastsave";
 
 // hash cmd
 const std::string kCmdNameHSet = "hset";

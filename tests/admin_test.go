@@ -11,6 +11,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -173,6 +174,24 @@ var _ = Describe("Admin", Ordered, func() {
 		client.Del(ctx, "key2")
 		Expect(res.Err()).NotTo(HaveOccurred())
 		Expect(client.DBSize(ctx).Val()).To(Equal(int64(0)))
+	})
+
+	It("Cmd Lastsave", func() {
+		lastSave := client.LastSave(ctx)
+		Expect(lastSave.Err()).NotTo(HaveOccurred())
+		Expect(lastSave.Val()).To(Equal(int64(0)))
+
+		bgSaveTime1 := time.Now().Unix()
+		bgSave, err := client.BgSave(ctx).Result()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(bgSave).To(ContainSubstring("Background saving started"))
+		time.Sleep(1 * time.Second)
+		bgSaveTime2 := time.Now().Unix()
+
+		lastSave = client.LastSave(ctx)
+		Expect(lastSave.Err()).NotTo(HaveOccurred())
+		Expect(lastSave.Val()).To(BeNumerically(">=", bgSaveTime1))
+		Expect(lastSave.Val()).To(BeNumerically("<=", bgSaveTime2))
 	})
 
 	It("Cmd Debug", func() {

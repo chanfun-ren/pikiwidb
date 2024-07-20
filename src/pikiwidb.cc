@@ -124,6 +124,15 @@ void PikiwiDB::OnNewConnection(pikiwidb::TcpConnection* obj) {
   obj->SetSlaveEventLoopSelector([this]() { return slave_threads_.ChooseNextWorkerEventLoop(); });
 }
 
+void PikiwiDB::StartBgsave() { is_bgsaving_ = true; }
+
+void PikiwiDB::FinishBgsave() {
+  is_bgsaving_ = false;
+  lastsave_ = pstd::UnixTimestamp();
+}
+
+int64_t PikiwiDB::GetLastSave() const { return lastsave_; }
+
 bool PikiwiDB::Init() {
   char runid[kRunidSize + 1] = "";
   getRandomHexChars(runid, kRunidSize);

@@ -7,6 +7,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <iomanip>
+#include <iostream>
 #include <random>
 
 namespace pstd {
@@ -62,5 +64,7 @@ inline int64_t UnixNanoTimestamp() {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
       .count();
 }
+
+std::string NowTimeStr();
 
 }  // namespace pstd

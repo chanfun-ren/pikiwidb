@@ -137,6 +137,28 @@ class DbsizeCmd : public BaseCmd {
   void DoCmd(PClient* client) override;
 };
 
+class BgsaveCmd : public BaseCmd {
+ public:
+  BgsaveCmd(const std::string& name, int16_t arity);
+
+ protected:
+  bool DoInitial(PClient* client) override;
+
+ private:
+  void DoCmd(PClient* client) override;
+};
+
+class LastsaveCmd : public BaseCmd {
+ public:
+  LastsaveCmd(const std::string& name, int16_t arity);
+
+ protected:
+  bool DoInitial(PClient* client) override;
+
+ private:
+  void DoCmd(PClient* client) override;
+};
+
 class CmdDebug : public BaseCmdGroup {
  public:
   CmdDebug(const std::string& name, int arity);
